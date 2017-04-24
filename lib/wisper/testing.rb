@@ -128,7 +128,7 @@ module Wisper
     end
     
     def self.global_broadcaster_for(registration)
-      global_broadcaster[[registration.listener, registration.on]]
+      global_broadcasters[[registration.listener, registration.on]]
     end
 
     def self.store_original_broadcasters

@@ -16,7 +16,7 @@ module Wisper
       end
       
       store_global_broadcasters
-      Wisper::GlobalListener.registrations.each do |registration|
+      Wisper::GlobalListeners.registrations.each do |registration|
         registration.instance_variable_set("@broadcaster", FakeBroadcaster.new)
       end
       
@@ -48,7 +48,7 @@ module Wisper
       end
       
       store_global_broadcasters
-      Wisper::GlobalListener.registrations.each do |registration|
+      Wisper::GlobalListeners.registrations.each do |registration|
         registration.instance_variable_set("@broadcaster", InlineBroadcaster.new)
       end
       
@@ -79,7 +79,7 @@ module Wisper
           Wisper.configuration.broadcasters[key] = broadcaster
         end
         
-        Wisper::GlobalListener.registrations.each do |registration|
+        Wisper::GlobalListeners.registrations.each do |registration|
           registration.instance_variable_set("@broadcaster", global_broadcaster_for(registration))
         end
         

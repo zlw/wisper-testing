@@ -14,6 +14,12 @@ module Wisper
       Wisper.configuration.broadcasters.keys.each do |key, broadcaster|
         Wisper.configuration.broadcasters[key] = FakeBroadcaster.new
       end
+      
+      store_global_broadcasters
+      Wisper::GlobalListeners.registrations.each do |registration|
+        registration.instance_variable_set("@broadcaster", FakeBroadcaster.new)
+      end
+      
       is_enabled
       self
     end
@@ -40,6 +46,12 @@ module Wisper
       Wisper.configuration.broadcasters.keys.each do |key, broadcaster|
         Wisper.configuration.broadcasters[key] = InlineBroadcaster.new
       end
+      
+      store_global_broadcasters
+      Wisper::GlobalListeners.registrations.each do |registration|
+        registration.instance_variable_set("@broadcaster", InlineBroadcaster.new)
+      end
+      
       is_enabled
       self
     end
@@ -66,6 +78,11 @@ module Wisper
         original_broadcasters.each do |key, broadcaster|
           Wisper.configuration.broadcasters[key] = broadcaster
         end
+        
+        Wisper::GlobalListeners.registrations.each do |registration|
+          registration.instance_variable_set("@broadcaster", global_broadcaster_for(registration))
+        end
+        
         is_not_enabled
       end
       self
@@ -105,9 +122,26 @@ module Wisper
     def self.original_broadcasters
       @original_broadcasters
     end
+    
+    def self.global_broadcasters
+      @global_broadcasters
+    end
+    
+    def self.global_broadcaster_for(registration)
+      global_broadcasters[[registration.listener, registration.on]]
+    end
 
     def self.store_original_broadcasters
       @original_broadcasters = Wisper.configuration.broadcasters.to_h.dup
+    end
+    
+    def self.store_global_broadcasters
+      @global_broadcasters = Wisper::GlobalListeners.registrations.map do |registration|
+        key = [registration.listener, registration.on]
+        val = registration.broadcaster
+        
+        [key, val]
+      end.to_h
     end
 
     def self.original_broadcasters?
